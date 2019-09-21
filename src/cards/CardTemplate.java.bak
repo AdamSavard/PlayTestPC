@@ -368,9 +368,4 @@ public class CardTemplate implements Comparable<CardTemplate>, Cloneable {
 			return null;
 		}
 	}
-	
-	@Override
-	public String toString() {
-		return name;
-	}
 }

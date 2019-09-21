@@ -113,13 +113,4 @@ public class CardTemplateList {
 		}
 		return templateNames;
 	}
-	
-	@Override
-	public String toString() {
-		String output = "{";
-		for(int i = 0; i < templates.size(); i++) {
-			output += templates.get(i).getName() + (i == templates.size() ? "}" : ",");
-		}
-		return output;
-	}
 }
