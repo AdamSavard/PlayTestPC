@@ -87,13 +87,18 @@ public class MainController {
 		if (selectName) view.moveFocusToName();
 	}
 	
+	public int addCard(String list, boolean selectCard) {
+		Card newCard = new Card(CardTemplateListFactory.getCardTemplateList().get(model.getOpenSet().getDefaultTemplate()));
+		return addCard(list, newCard, selectCard);
+	}
+	
 	/*
-	 * Add a card to the set and to the current list - does not select that card
+	 * Add a card to the set and to the current list
+	 * optionally select that card
 	 */
-	public int addCard(String list) {
+	public int addCard(String list, Card newCard, boolean selectCard) {
 		if(model.getOpenSet() == null) return -1;
 		// Add card to set
-		Card newCard = new Card(CardTemplateListFactory.getCardTemplateList().get(model.getOpenSet().getDefaultTemplate()));
 		int newIndex = model.getOpenSet().addCardToListAndSet(list, newCard);
 		// not saved now				
 		setSaved(false);
@@ -104,11 +109,10 @@ public class MainController {
 				model.getOpenSet().getDataFromCard(newCard, CardTemplateListFactory.getCardTemplateList().get(newCard.getTemplateName()).getComponentNameList()));
 		// Select correct card on table
 		view.selectCardOnList(list, model.getOpenSet().getSelectedIndex(list));
+		if(selectCard) {
+			selectCard(list, newIndex, true);
+		}
 		return newIndex;
-	}
-	
-	public void addAndSelectCard(String list) {
-		selectCard(list, addCard(list), true);
 	}
 	
 	public void removeCard(String list) {
@@ -208,7 +212,7 @@ public class MainController {
 			if (clipboard.isDataFlavorAvailable(flavor)) {
 				// Add the card to the set
 				Card newCard = (Card) clipboard.getData(flavor);
-				model.getOpenSet().addCardToListAndSet(list, newCard);
+				addCard(list, newCard, true);
 			}
 		}catch (UnsupportedFlavorException | IOException e) {
 			e.printStackTrace();
@@ -291,6 +295,8 @@ public class MainController {
 		CardTemplate edited = SetWizard.editTemplate(view, original.clone());
 		// If template was not saved, we're done here
 		if(edited == null) return;
+		// update the model
+		model.getOpenSet().setSelectedCardTemplate(MainView.CARD_EDITOR_LIST, edited.getName());
 		if(original.getName().equals(edited.getName())) {
 			// Template has been edited, update the template image
 			view.updateCardTemplateListSingleImage(edited.getImage(edited.getWidth(), edited.getHeight()),
@@ -302,7 +308,6 @@ public class MainController {
 					CardTemplateListFactory.getCardTemplateList().put(edited));
 		}
 		// Update card image
-		model.getOpenSet().setSelectedCardTemplate(MainView.CARD_EDITOR_LIST, edited.getName());
 		view.updateCardTemplateImage(model.getOpenSet().getSelectedImage(MainView.CARD_EDITOR_LIST));
 		// We will need to update the cards view
 		model.setResetCards(1);
@@ -353,7 +358,7 @@ public class MainController {
 		// Prevent selecting cards
 		model.setOpeningSetFlag(true);
 		// Add first card to the set
-		if(model.getOpenSet().getCardCount() == 0) addCard(MainView.CARD_EDITOR_LIST);
+		if(model.getOpenSet().getCardCount() == 0) addCard(MainView.CARD_EDITOR_LIST, false);
 		// Refresh the contents of the card editor list
 		refreshList(MainView.CARD_EDITOR_LIST, 0);
 		// Enable selecting cards

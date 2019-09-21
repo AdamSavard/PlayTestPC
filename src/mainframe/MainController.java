@@ -160,8 +160,12 @@ public class MainController {
 		setSaved(false);
 	}
 	
-	public void exportDeck() {
-		PrintWizard.exportDeck(view, model.getOpenSet());
+	public void exportHtmlDeck() {
+		PrintWizard.exportHtmlDeck(view, model.getOpenSet());
+	}
+	
+	public void exportExcelDeck() {
+		PrintWizard.exportExcelDeck(view, model.getOpenSet());
 	}
 	
 	public boolean save() {

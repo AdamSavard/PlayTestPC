@@ -9,6 +9,8 @@ public class DAOFactory {
     private static ImageDAO image;
     
     private static HtmlDAO html;
+    
+    private static ExcelDAO excel;
 	
 	public static CardSetDAO getCardSetDAO(){
 		if (null == cardSet) {
@@ -36,6 +38,13 @@ public class DAOFactory {
 			html = new HtmlDAOFileSys();
         }
         return html;
+	}
+	
+	public static ExcelDAO getExcelDAO() {
+		if (null == excel) {
+			excel = new ExcelDAOFileSys();
+        }
+        return excel;
 	}
 
 

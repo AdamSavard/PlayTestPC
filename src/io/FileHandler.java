@@ -5,6 +5,7 @@ import java.awt.Desktop;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
@@ -16,10 +17,17 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  * This class provides methods for quickly dealing with files
@@ -28,7 +36,7 @@ public class FileHandler {
 	
 	private final static Charset ENCODING = StandardCharsets.UTF_8;
 
-	// Get wroking directory
+	// Get working directory
 	protected static String workingDir(){
 		return Paths.get("").toAbsolutePath().toString();
 	}
@@ -115,6 +123,43 @@ public class FileHandler {
 	    catch (Exception e) {
             e.printStackTrace();
         }
+	}
+	
+	protected static boolean writeExcel(String fileName, List<List<Object>> data) {
+		// Blank workbook
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        // Create a blank sheet
+        XSSFSheet sheet = workbook.createSheet("Cards");
+        
+        // Iterate over data and write to sheet
+        Object obj;
+        for (int rowNum = 0; rowNum < data.size(); rowNum++)
+        {
+            Row row = sheet.createRow(rowNum);
+            for (int cellNum = 0; cellNum < data.get(rowNum).size(); cellNum++)
+            {
+               Cell cell = row.createCell(cellNum);
+               obj = data.get(rowNum).get(cellNum);
+               if(obj instanceof String)
+                    cell.setCellValue((String)obj);
+                else if(obj instanceof Integer)
+                    cell.setCellValue((Integer)obj);
+            }
+        }
+        try
+        {
+            //Write the workbook in file system
+            FileOutputStream out = new FileOutputStream(new File(fileName));
+            workbook.write(out);
+            out.close();
+            workbook.close();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
 	}
 
 }

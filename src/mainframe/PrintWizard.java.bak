@@ -3,17 +3,9 @@ package mainframe;
 import io.DAOFactory;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 import mainframe.popup.ExportDialog;
 import cards.Card;
@@ -23,7 +15,7 @@ public final class PrintWizard {
 
 	private static ExportDialog exporter; // Export dialog
 	
-	public static void exportHtmlDeck(JFrame parent, CardSet openSet) {
+	public static void exportDeck(JFrame parent, CardSet openSet) {
 		List<Integer> ids = openSet.getIds();
 		List<Card> cards = openSet.getCards(ids);
 		List<String> names = openSet.getCardNames(ids);
@@ -60,44 +52,6 @@ public final class PrintWizard {
 		
 		// Print html file and open it
 		DAOFactory.getHtmlDAO().write(htmlPage);
-	}
-	
-	public static void exportExcelDeck(JFrame parent, CardSet openSet)
-	{
-		JFileChooser fileChooser = new JFileChooser();
-		fileChooser.setName("Save Excel File");
-		fileChooser.setFileFilter(new FileNameExtensionFilter("Excel File","xlsx"));
-		fileChooser.setSelectedFile(new File("export.xlsx"));
-		if (fileChooser.showSaveDialog(parent) != JFileChooser.APPROVE_OPTION) {
-			return;
-		}
-		setToExcelFile(fileChooser.getSelectedFile().getAbsolutePath(), openSet);
-	}
-	
-	private static void setToExcelFile(String fileName, CardSet openSet)
-	{
-		List<List<Object>> excelData = new ArrayList<List<Object>>();
-		Map<String, Integer> fieldIndexes = new HashMap<String, Integer>();
-		int tempRowIndex, tempColumnIndex;
-		excelData.add(new ArrayList<Object>());
-		excelData.get(0).add("Template");
-		for(Card card : openSet.getCards(MainView.CARD_EDITOR_LIST)){
-			excelData.add(new ArrayList<Object>());
-			tempRowIndex = excelData.size() - 1;
-			for(String field : card.getData().keySet()) {
-				if(!fieldIndexes.containsKey(field)) {
-					excelData.get(0).add(field);
-					fieldIndexes.put(field, excelData.get(0).size() - 1);
-				}
-				tempColumnIndex = fieldIndexes.get(field);
-				while (excelData.get(tempRowIndex).size() <= tempColumnIndex) {
-					excelData.get(tempRowIndex).add("");
-				}
-				excelData.get(tempRowIndex).set(tempColumnIndex, (String)card.getData(field));
-			}
-		}
-		// Save excel file
-		DAOFactory.getExcelDAO().write(fileName, excelData);
 	}
 	
 	private static boolean isZeroes(List<Integer> data){

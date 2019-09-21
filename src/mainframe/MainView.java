@@ -86,7 +86,7 @@ public class MainView extends JRibbonFrame {
 	//RibbonApplicationMenuEntryPrimary newButton;
 	RibbonTask fileTask, setManagerTask, helpTask;
 	JRibbonBand ioBand, clipboardBand, tableBand, aboutBand;
-	JCommandButton newButton, openButton, saveButton, saveAsButton, exportButton, pasteButton, copyButton, cutButton;
+	JCommandButton newButton, openButton, saveButton, saveAsButton, printButton, exportButton, pasteButton, copyButton, cutButton;
 	JCommandButton bulkEditButton, aboutButton;
 	
 	// Tabs
@@ -207,8 +207,12 @@ public class MainView extends JRibbonFrame {
 		saveAsButton.addActionListener(new SaveAsClicked());
 		ioBand.addCommandButton(saveAsButton, RibbonElementPriority.MEDIUM);
 		
-		exportButton = new JCommandButton("Export Set", DAOFactory.getImageDAO().readResizableIcon("Export.png"));
-		exportButton.addActionListener(new ExportClicked());
+		printButton = new JCommandButton("Print Set", DAOFactory.getImageDAO().readResizableIcon("Export.png"));
+		printButton.addActionListener(new PrintClicked());
+		ioBand.addCommandButton(printButton, RibbonElementPriority.MEDIUM);
+		
+		exportButton = new JCommandButton("Export Set", DAOFactory.getImageDAO().readResizableIcon("Excel.png"));
+		exportButton.addActionListener(new ExportExcelClicked());
 		ioBand.addCommandButton(exportButton, RibbonElementPriority.MEDIUM);
 		
 		ioBand.setResizePolicies((List) Arrays.asList(
@@ -497,9 +501,15 @@ public class MainView extends JRibbonFrame {
         }
     }
 	
-	private class ExportClicked implements ActionListener {
+	private class PrintClicked implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			controller.exportDeck();
+			controller.exportHtmlDeck();
+		}
+	}
+	
+	private class ExportExcelClicked implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			controller.exportExcelDeck();
 		}
 	}
 	

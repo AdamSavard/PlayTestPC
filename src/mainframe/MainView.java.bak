@@ -140,9 +140,6 @@ public class MainView extends JRibbonFrame {
 	private JPanel subsetDetailsPanel;
 	
 	private JScrollPane subsetTableScroll;
-	
-	// Use this to suppress event listeners that trigger off of manually changing fields
-	private int componentLock;
 
 	/******************************** vvv INITIALIZATION vvv ********************************/
 	
@@ -172,7 +169,6 @@ public class MainView extends JRibbonFrame {
 
     	pack();
     	setExtendedState(getExtendedState()|JFrame.MAXIMIZED_BOTH);
-    	componentLock = 0;
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -346,7 +342,7 @@ public class MainView extends JRibbonFrame {
 		cardListTableModelMap.put(CARD_EDITOR_LIST, new CardTableModel());
 		cardListTableMap.put(CARD_EDITOR_LIST, new JTable(cardListTableModelMap.get(CARD_EDITOR_LIST)));
 		cardListTableMap.get(CARD_EDITOR_LIST).setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		cardListTableMap.get(CARD_EDITOR_LIST).getSelectionModel().addListSelectionListener(new CardSelected(CARD_EDITOR_LIST));
+		cardListTableMap.get(CARD_EDITOR_LIST).getSelectionModel().addListSelectionListener(new CardSelected(CARD_EDITOR_LIST,cardListTableMap.get(CARD_EDITOR_LIST)));
 		cardListTableMap.get(CARD_EDITOR_LIST).addKeyListener(new ListKeyListener());
 		cardListTableMap.get(CARD_EDITOR_LIST).getTableHeader().addMouseListener(new ColumnClicked(CARD_EDITOR_LIST));
 		
@@ -489,7 +485,7 @@ public class MainView extends JRibbonFrame {
             if (e.getID() != KeyEvent.KEY_PRESSED) return false;
         	// Ctrl+D to ADD
         	if ((e.getKeyCode() == KeyEvent.VK_D) && ((e.getModifiers() & KeyEvent.CTRL_MASK) != 0)) {
-        		controller.addCard(CARD_EDITOR_LIST);
+        		controller.addCard(CARD_EDITOR_LIST, false);
                 return true;
             }
         	// Ctrl+S to SAVE
@@ -539,7 +535,7 @@ public class MainView extends JRibbonFrame {
 	
 	private class AddCardClicked implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			controller.addAndSelectCard(CARD_EDITOR_LIST);
+			controller.addCard(CARD_EDITOR_LIST, true);
 		}
 	}
 	
@@ -552,7 +548,7 @@ public class MainView extends JRibbonFrame {
 	private class AddCardKeyListener implements KeyListener {
 		public void keyPressed(KeyEvent e) {
 			if(e.getKeyCode() == KeyEvent.VK_ENTER){
-				controller.addCard(CARD_EDITOR_LIST);
+				controller.addCard(CARD_EDITOR_LIST, false);
 				e.consume();
 				return;
 			}
@@ -615,15 +611,19 @@ public class MainView extends JRibbonFrame {
 		
 		private String list;
 		
-		public CardSelected(String iList){
+		private JTable owner;
+		
+		public CardSelected(String list, JTable owner){
 			super();
-			list = iList;
+			this.list = list;
+			this.owner = owner;
 		}
 		
 		@Override
 		public void valueChanged(ListSelectionEvent ev) {
 			if(cardListTableMap.get(list).getSelectedRow() < 0) return;
 			controller.selectCard(list, cardListTableMap.get(list).getSelectedRow(), true);
+			owner.requestFocusInWindow();
 		} 
 	}
 	
@@ -734,10 +734,6 @@ public class MainView extends JRibbonFrame {
 	private class CardPropertyChanged implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) { // Card component changed somewhere
-			if(componentLock > 0){
-				componentLock--;
-				return;
-			}
 			JAbstractSuperChooser owner = (JAbstractSuperChooser)e.getSource();
 			if(owner == null) return;
 			String compName = owner.getValue("Name"); // Card Component name
@@ -747,10 +743,6 @@ public class MainView extends JRibbonFrame {
 	
 	private class CommentChanged implements ActionListener {
 		public void actionPerformed(ActionEvent e) { // Card comment changed
-			if(componentLock > 0){
-				componentLock--;
-				return;
-			}
 			JComponent owner = (JAbstractSuperChooser)e.getSource();
 			if(owner == null) return;
 			controller.updateComments(CARD_EDITOR_LIST, (String)commentText.getData());
@@ -965,6 +957,7 @@ public class MainView extends JRibbonFrame {
 		if(dataComps == null || dataComps.size() <= 0) {
 			return;
 		}
+		// TODO make this work
 		dataComps.get(0).requestFocus();
 		dataComps.get(0).requestFocusInWindow();
 		/*try {
@@ -988,17 +981,18 @@ public class MainView extends JRibbonFrame {
 	public void updateCardComponent(String type, int index, Object data){
 		if(dataComps.getData(index).equals(data.toString())) return;
 		// Increment this before triggering event listener
-		componentLock++;
+		dataComps.get(index).disableActionListeners();
 		if(!dataComps.setData(index, data)){
 			// Nevermind, didn't touch the data
-			componentLock--;
 		}
+		dataComps.get(index).enableActionListeners();
 	}
 	
 	public void updateCardComments(String newComments){
 		if(commentText.getData().equals(newComments)) return;
-		componentLock++;
+		commentText.disableActionListeners();
 		commentText.setData(newComments);
+		commentText.enableActionListeners();
 	}
 	
 	public void updateCardImage(BufferedImage img){
