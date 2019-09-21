@@ -20,13 +20,11 @@ public abstract class JAbstractSuperChooser extends JPanel {
 	
 	protected List<ActionListener> listeners;
 	
-	private boolean listenersActive;
-	
 	public JAbstractSuperChooser() {
 		super();
 		values = new HashMap<String, String>();
 		listeners = new ArrayList<ActionListener>();
-		listenersActive = true;
+		//this.addFocusListener(new ChooserFocusListener());
 	}
 	
 	public abstract boolean setData(Object data);
@@ -43,20 +41,7 @@ public abstract class JAbstractSuperChooser extends JPanel {
 		listeners.add(newListener);
 	}
 	
-	public void removeActionListener(ActionListener newListener) {
-		listeners.remove(newListener);
-	}
-	
-	public void disableActionListeners() {
-		listenersActive = false;
-	}
-	
-	public void enableActionListeners() {
-		listenersActive = true;
-	}
-	
 	protected void dataChanged(){
-		if(!listenersActive) return;
 		for(ActionListener i : listeners){
 			i.actionPerformed(new ActionEvent(this, 0, "change"));
 		}

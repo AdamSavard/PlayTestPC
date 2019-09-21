@@ -137,7 +137,6 @@ public class CardSet {
 		cardlists.get(list).insertCard(newID, index);
 		// Add card image
 		images.put(newID, new CardImage(CardTemplateListFactory.getCardTemplateList().get(newCard.getTemplateName())));
-		images.get(newID).updateImage(CardTemplateListFactory.getCardTemplateList().get(newCard.getTemplateName()), newCard.getData());
 		return index;
 	}
 	

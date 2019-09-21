@@ -61,9 +61,11 @@ import org.pushingpixels.flamingo.internal.ui.ribbon.BasicRibbonUI;
 import cards.components.CardComponent;
 import view.components.CardDisplayPanel;
 import view.components.JSearchBarTextField;
+import view.components.JSuperTextArea;
 import view.components.MultiCardDisplayPanel;
 import view.components.choosers.JAbstractSuperChooser;
 import view.components.choosers.JSuperChooserList;
+import view.components.choosers.JSuperTextChooser;
 import view.components.choosers.SuperChooserFactory;
 import view.misc.TabControl;
 import view.misc.table.CardTableModel;
@@ -109,7 +111,7 @@ public class MainView extends JRibbonFrame {
 	private JLabel[] compLabels; // card component text labels
 	private JSuperChooserList dataComps; // components for card component values
 	private JLabel commentLabel;
-	private JTextArea commentText;
+	private JSuperTextChooser commentText;
 	
 	// TEMPLATES TAB
 	private JSplitPane spDispTemplates;
@@ -667,8 +669,8 @@ public class MainView extends JRibbonFrame {
 	            return;
 	        }
 			if(e.getKeyCode() == KeyEvent.VK_ENTER){ // If enter
-				JTextArea txt = (JTextArea)e.getComponent();
-				if(isFinalRow(txt)){ // If final row, move down to next component
+				JTextArea txtArea = (JTextArea)e.getComponent();
+				if(isFinalRow(txtArea)){ // If final row, move down to next component
 		            if(e.getModifiers() > 0){
 		            	e.getComponent().transferFocusBackward();
 		            }else{
@@ -677,12 +679,15 @@ public class MainView extends JRibbonFrame {
 					e.consume();
 		            return;
 				}
-				// If there are already enough line seperators
-				if(txt.getText().split("\r\n|\r|\n", -1).length >= txt.getRows()){
+				// If there are already enough line separators
+				String text = txtArea.getText();
+				text = text.replaceAll("\r", "");
+				String[] textSplit = text.split("\n", -1);
+				if(textSplit.length >= txtArea.getRows()){
 					e.consume();
 					return; // Do nothing
 				}
-				//Add line seperater properly
+				//Add line separator properly
 				((JTextArea)e.getComponent()).insert(System.lineSeparator(), ((JTextArea)e.getComponent()).getSelectionStart());
 	            e.consume();
 	            return;
@@ -740,24 +745,15 @@ public class MainView extends JRibbonFrame {
 		}
 	}
 	
-	private class CommentChanged implements DocumentListener {
-		public void changedUpdate(DocumentEvent e) {
-			update(e);
-		}
-		public void insertUpdate(DocumentEvent e) {
-			update(e);
-		}
-		public void removeUpdate(DocumentEvent e) {
-			update(e);
-		}
-		public void update(DocumentEvent e){ // Card comment changed
+	private class CommentChanged implements ActionListener {
+		public void actionPerformed(ActionEvent e) { // Card comment changed
 			if(componentLock > 0){
 				componentLock--;
 				return;
 			}
-			JComponent owner = (JComponent)e.getDocument().getProperty("owner");
+			JComponent owner = (JAbstractSuperChooser)e.getSource();
 			if(owner == null) return;
-			controller.updateComments(CARD_EDITOR_LIST, commentText.getText());
+			controller.updateComments(CARD_EDITOR_LIST, (String)commentText.getData());
 		}
 	}
 	
@@ -839,9 +835,9 @@ public class MainView extends JRibbonFrame {
 		commentLabel = new JLabel("Comments");
 		commentLabel.setFont(new Font("Sans Serif", Font.PLAIN, 12));
 		cardPanel.add(commentLabel);
-		commentText = new JTextArea(5, columns);
+		commentText = new JSuperTextChooser(5, columns);
 		commentText.addKeyListener(new CardKeyListener());
-		commentText.getDocument().addDocumentListener(new CommentChanged());
+		commentText.addActionListener(new CommentChanged());
 		commentText.setFont(new Font("Sans Serif", Font.PLAIN, 12));
 		cardPanel.add(commentText);
 		order.add(commentText);
@@ -1000,9 +996,9 @@ public class MainView extends JRibbonFrame {
 	}
 	
 	public void updateCardComments(String newComments){
-		if(commentText.getText().equals(newComments)) return;
+		if(commentText.getData().equals(newComments)) return;
 		componentLock++;
-		commentText.setText(newComments);
+		commentText.setData(newComments);
 	}
 	
 	public void updateCardImage(BufferedImage img){
