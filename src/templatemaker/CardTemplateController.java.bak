@@ -373,7 +373,7 @@ public class CardTemplateController {
 	private void updateLines(){
 		if(model.getTemplate().getSelectedComponent().getLines() == 0) return;
 		TextFieldComponent selectedTxt = (TextFieldComponent)model.getTemplate().getSelectedComponent();
-		int newLines = selectedTxt.getFontSize() == 0 ? 0 : selectedTxt.getHeight() / selectedTxt.getFontSize();
+		int newLines = selectedTxt.getHeight() / selectedTxt.getFontSize();
 		if(newLines < 1){
 			// Set height equal to font size so that there is enough height for exactly 1 line
 			selectedTxt.setHeight(selectedTxt.getFontSize());
