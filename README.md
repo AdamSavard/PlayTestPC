@@ -1,2 +1,2 @@
 # PlayTestPC
- playtest desktop app
+This is a tool for game designers who want to manage sets of game pieces like cards, and want to be able to quickly print them out for tabletop playtesting. I built this in college after learning Java. It is a Java based desktop app which unfortunately makes it feel dated. Many features I had planned never actually got implemented. At this point, I would remake it as a web application if anything. I wrote some pretty Java code here that could easily be built on though.
